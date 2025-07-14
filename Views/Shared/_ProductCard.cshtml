@@ -1,0 +1,76 @@
+﻿@model Doanwebcuoiki.Models.Product
+@using System.Globalization
+
+@{
+    var viVN = new CultureInfo("vi-VN");
+
+    var isDiscounted = Model.product_discount_price.HasValue;
+    var discountPercent = isDiscounted
+        ? (int)Math.Round(100.0 * (Model.product_price - Model.product_discount_price.Value) / Model.product_price)
+        : 0;
+
+    var finalPrice = isDiscounted ? Model.product_discount_price.Value : Model.product_price;
+    var priceFormat = finalPrice.ToString("N0", viVN);
+    var originalPriceFormat = Model.product_price.ToString("N0", viVN);
+    var rating = Model.product_rating.ToString("0.0");
+}
+
+<!-- Nên để đoạn này ở layout hoặc site.css, nhưng có thể đặt tại đây nếu chỉ dùng 1 lần -->
+<style>
+    .btn-outline-green {
+        border: 1.5px solid #6CB33E;
+        color: #6CB33E;
+        background-color: #fff;
+        transition: background 0.2s, color 0.2s;
+    }
+
+        .btn-outline-green:hover, .btn-outline-green:focus {
+            background-color: #6CB33E;
+            color: #fff;
+            border-color: #6CB33E;
+        }
+</style>
+
+<div class="col-12 col-sm-6 col-md-3 mb-4">
+    <div class="card h-100 shadow-sm border-0">
+        <a href="@Url.Action("ProductDetail", "Home", new { id = Model.product_id })" class="text-decoration-none">
+            <img src="~/product_images/@Model.product_image"
+                 class="card-img-top"
+                 style="width:100%; height:180px; object-fit:contain;"
+                 alt="@Model.product_name" />
+        </a>
+        <div class="card-body d-flex flex-column">
+            <!-- Đánh giá + Đã bán -->
+            <div class="d-flex justify-content-between small text-muted mb-1">
+                <span>
+                    <i class="fas fa-star text-warning"></i> @rating (@Model.product_review_count)
+                </span>
+                <span>Đã bán: @Model.product_sold</span>
+            </div>
+
+            <!-- Tên sản phẩm -->
+            <h6 class="card-title fw-bold text-truncate" title="@Model.product_name">
+                @Model.product_name
+            </h6>
+
+            <!-- Giá -->
+            @if (isDiscounted)
+            {
+                <div class="mb-2">
+                    <span class="text-danger fw-bold">@priceFormat ₫</span>
+                    <span class="text-muted text-decoration-line-through ms-2">@originalPriceFormat ₫</span>
+                    <span class="badge bg-danger ms-2">-@discountPercent%</span>
+                </div>
+            }
+            else
+            {
+                <p class="text-danger fw-bold mb-2">@priceFormat ₫</p>
+            }
+
+            <!-- Nút giỏ hàng -->
+            <a href="@Url.Action("Login", "Account")" class="btn btn-outline-green mt-auto w-100">
+                <i class="fas fa-cart-plus me-1"></i> Thêm vào giỏ
+            </a>
+        </div>
+    </div>
+</div>

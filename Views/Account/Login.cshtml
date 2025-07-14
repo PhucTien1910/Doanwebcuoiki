@@ -1,0 +1,682 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Login / Signup Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap" rel="stylesheet">
+    <style>
+        /* ... tất cả css bạn gửi phía trên giữ nguyên ... */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins',sans-serif;
+        }
+
+        html, body {
+            display: grid;
+            height: 100%;
+            width: 100%;
+            place-items: center;
+            background: linear-gradient(90deg,#b6e69a,#6CB33E,#b6e69a);
+        }
+
+        ::selection {
+            background: #6CB33E;
+            color: #fff;
+        }
+
+        .wrapper {
+            overflow: hidden;
+            max-width: 390px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 15px 20px rgba(0,0,0,0.1);
+        }
+
+            .wrapper .title-text {
+                display: flex;
+                width: 200%;
+            }
+
+            .wrapper .title {
+                width: 50%;
+                font-size: 35px;
+                font-weight: 600;
+                text-align: center;
+                transition: all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
+                color: #6CB33E;
+            }
+
+            .wrapper .slide-controls {
+                position: relative;
+                display: flex;
+                height: 50px;
+                width: 100%;
+                overflow: hidden;
+                margin: 30px 0 10px 0;
+                justify-content: space-between;
+                border: 1px solid #b9e3a6;
+                border-radius: 15px;
+                background: #e6f7e1;
+            }
+
+        .slide-controls .slide {
+            height: 100%;
+            width: 100%;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+            line-height: 48px;
+            cursor: pointer;
+            z-index: 1;
+            transition: all 0.6s ease;
+        }
+
+        .slide-controls label.signup {
+            color: #6CB33E;
+        }
+
+        .slide-controls label.login {
+            color: #6CB33E;
+        }
+
+        .slide-controls .slider-tab {
+            position: absolute;
+            height: 100%;
+            width: 50%;
+            left: 0;
+            z-index: 0;
+            border-radius: 15px;
+            background: linear-gradient(90deg,#b6e69a,#6CB33E);
+            transition: all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        #signup:checked ~ .slider-tab {
+            left: 50%;
+        }
+
+        #signup:checked ~ label.signup {
+            color: #fff;
+            cursor: default;
+            user-select: none;
+        }
+
+        #signup:checked ~ label.login {
+            color: #6CB33E;
+        }
+
+        #login:checked ~ label.signup {
+            color: #6CB33E;
+        }
+
+        #login:checked ~ label.login {
+            cursor: default;
+            user-select: none;
+            color: #fff;
+        }
+
+        .wrapper .form-container {
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .form-container .form-inner {
+            display: flex;
+            width: 200%;
+        }
+
+            .form-container .form-inner form {
+                width: 50%;
+                transition: all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
+            }
+
+        .form-inner form .field {
+            height: 50px;
+            width: 100%;
+            margin-top: 25px;
+            position: relative;
+        }
+
+            .form-inner form .field input {
+                height: 100%;
+                width: 100%;
+                outline: none;
+                padding-left: 15px;
+                border-radius: 15px;
+                border: 1px solid #b9e3a6;
+                border-bottom-width: 2px;
+                font-size: 17px;
+                transition: all 0.3s ease;
+            }
+
+                .form-inner form .field input:focus {
+                    border-color: #6CB33E;
+                }
+
+                .form-inner form .field input::placeholder {
+                    color: #b4c9ae;
+                    transition: all 0.3s ease;
+                }
+
+        form .field input:focus::placeholder {
+            color: #6CB33E;
+        }
+
+        .toggle-pw {
+            position: absolute;
+            right: 18px;
+            top: 17px;
+            cursor: pointer;
+            font-size: 18px;
+            user-select: none;
+            width: 22px;
+            height: 22px;
+        }
+
+        .form-inner form .pass-link {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .form-inner form .signup-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+            .form-inner form .pass-link a, .form-inner form .signup-link a {
+                color: #6CB33E;
+                text-decoration: none;
+            }
+
+                .form-inner form .pass-link a:hover, .form-inner form .signup-link a:hover {
+                    text-decoration: underline;
+                }
+
+        form .btn {
+            height: 50px;
+            width: 100%;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            form .btn .btn-layer {
+                height: 100%;
+                width: 300%;
+                position: absolute;
+                left: -100%;
+                background: linear-gradient(90deg,#b6e69a,#6CB33E,#b6e69a);
+                border-radius: 15px;
+                transition: all 0.4s ease;
+            }
+
+            form .btn:hover .btn-layer {
+                left: 0;
+            }
+
+            form .btn input[type="submit"] {
+                height: 100%;
+                width: 100%;
+                z-index: 1;
+                position: relative;
+                background: none;
+                border: none;
+                color: #fff;
+                padding-left: 0;
+                border-radius: 15px;
+                font-size: 20px;
+                font-weight: 500;
+                cursor: pointer;
+            }
+
+        .pw-checklist {
+            margin: 8px 0 8px 0;
+            padding-left: 18px;
+            font-size: 14px;
+            list-style: none;
+        }
+
+        .pw-check {
+            color: #bbb;
+            display: flex;
+            align-items: center;
+            margin-bottom: 2px;
+            font-size: 14px;
+        }
+
+            .pw-check .pw-icon {
+                width: 18px;
+                display: inline-block;
+                font-weight: bold;
+                color: #db3434;
+                font-size: 16px;
+                margin-right: 4px;
+                transition: color 0.2s;
+            }
+
+            .pw-check.passed {
+                color: #6CB33E;
+            }
+
+                .pw-check.passed .pw-icon {
+                    color: #6CB33E;
+                }
+
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="title-text">
+            <div class="title login">Đăng Nhập</div>
+            <div class="title signup">Đăng Kí</div>
+        </div>
+        <div class="form-container">
+            <div class="slide-controls">
+                <input type="radio" name="slide" id="login" checked>
+                <input type="radio" name="slide" id="signup">
+                <label for="login" class="slide login">Đăng nhập</label>
+                <label for="signup" class="slide signup">Đăng kí</label>
+                <div class="slider-tab"></div>
+            </div>
+            <div class="form-inner">
+                <!-- Login Form -->
+                <form method="post" class="login" autocomplete="off">
+                    <div class="field">
+                        <input type="text" name="username" placeholder="Tên đăng nhập" required>
+                    </div>
+                    <div class="field">
+                        <input type="password" name="password" placeholder="Mật khẩu" id="loginPassword" required>
+                        <img class="toggle-pw" src="/images/show.png" alt="Show/Hide" onclick="togglePw('loginPassword', this)">
+                    </div>
+                    <div class="field btn">
+                        <div class="btn-layer"></div>
+                        <input type="submit" value="Đăng nhập">
+                    </div>
+                    @* **Chỉ 1 thông báo lỗi duy nhất ở đây** *@
+                    @if (ViewBag.Error != null)
+                    {
+                        <div style="color: #db3434; margin: 12px 0; font-weight: 500; text-align: center;">
+                            @ViewBag.Error
+                        </div>
+                    }
+                    <div class="pass-link"><a href="#">Quên mật khẩu?</a></div>
+                    <div class="signup-link">Bạn chưa có tài khoản? <a href="#" id="signupNow">Đăng kí ngay</a></div>
+                </form>
+
+                <!-- Signup Form -->
+                <form method="post" action="/Account/Register" autocomplete="off" id="signupForm">
+                    <div class="field">
+                        <input type="text" name="username" placeholder="Tên tài khoản" required>
+                    </div>
+                    <div class="field">
+                        <input type="text" name="email" placeholder="Địa chỉ Email" required>
+                    </div>
+                    <div class="field">
+                        <input type="password" name="password" placeholder="Mật khẩu" id="signupPassword" required>
+                        <img class="toggle-pw" src="/images/show.png" alt="Show/Hide" onclick="togglePw('signupPassword', this)" style="pointer-events: none; opacity:0.5;">
+                    </div>
+                    <ul id="passwordChecklist" class="pw-checklist">
+                        <li id="chk-length" class="pw-check"><span class="pw-icon">✖</span> Tối thiểu 8 ký tự</li>
+                        <li id="chk-uppercase" class="pw-check"><span class="pw-icon">✖</span> Có ít nhất 1 chữ hoa</li>
+                        <li id="chk-special" class="pw-check"><span class="pw-icon">✖</span> Có ít nhất 1 ký tự đặc biệt (!*$)</li>
+                    </ul>
+                    <div class="field">
+                        <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu" id="signupConfirm" required>
+                        <img class="toggle-pw" src="/images/show.png" alt="Show/Hide" onclick="togglePw('signupConfirm', this)" style="pointer-events: none; opacity:0.5;">
+                    </div>
+                    <div class="field btn">
+                        <div class="btn-layer"></div>
+                        <input type="submit" value="Đăng kí">
+                    </div>
+                    @if (ViewBag.ErrorSignup != null)
+                    {
+                        <div id="signup-error-message" style="color:#db3434; margin: 20px 0 0 0; font-size:18px; font-weight:600; text-align:center;">
+                            @ViewBag.ErrorSignup
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        // --- ĐIỀU KHIỂN FORM LOGIN/SIGNUP ---
+        const loginText = document.querySelector(".title-text .login");
+        const loginForm = document.querySelector("form.login");
+        const loginBtn = document.querySelector("label.login");
+        const signupBtn = document.querySelector("label.signup");
+        const signupLink = document.querySelector("form .signup-link a");
+        signupBtn.onclick = (() => {
+            loginForm.style.marginLeft = "-50%";
+            loginText.style.marginLeft = "-50%";
+        });
+        loginBtn.onclick = (() => {
+            loginForm.style.marginLeft = "0%";
+            loginText.style.marginLeft = "0%";
+        });
+        signupLink.onclick = (() => {
+            signupBtn.click();
+            return false;
+        });
+
+        // --- VALIDATE EMAIL SIGNUP ---
+        const signupForm = document.getElementById('signupForm');
+        const emailInput = signupForm.querySelector('input[name="email"]');
+        let emailError = document.createElement("div");
+        emailError.style.color = "#db3434";
+        emailError.style.fontSize = "14px";
+        emailError.style.marginTop = "4px";
+        emailError.style.display = "none";
+        emailInput.parentNode.appendChild(emailError);
+
+        function isEmailFormat(email) {
+            return /^[a-zA-Z0-9._%+-]+@@gmail\.com$/.test(email);
+        }
+        function emailValidate() {
+            const val = emailInput.value.trim();
+            if (val === "") {
+                emailError.textContent = "Vui lòng nhập email!";
+                emailError.style.display = "block";
+                return false;
+            }
+            if (!isEmailFormat(val)) {
+                emailError.textContent = "Email phải đúng định dạng @@gmail.com";
+                emailError.style.display = "block";
+                return false;
+            }
+            emailError.textContent = "";
+            emailError.style.display = "none";
+            return true;
+        }
+        emailInput.addEventListener('input', emailValidate);
+        emailInput.addEventListener('blur', emailValidate);
+        emailInput.addEventListener('focus', emailValidate);
+
+        // --- PASSWORD CHECKLIST & TOGGLE EYE ---
+        const passwordInput = document.getElementById('signupPassword');
+        const pwChecklist = document.getElementById('passwordChecklist');
+        if (pwChecklist) pwChecklist.style.display = 'none';
+        const pwToggleIcon = document.querySelector('img.toggle-pw[onclick*="signupPassword"]');
+
+        function showPwChecklist() {
+            if (pwChecklist) pwChecklist.style.display = 'block';
+        }
+        function updatePwToggleState() {
+            if (!pwToggleIcon) return;
+            if (passwordInput.value.length === 0) {
+                pwToggleIcon.style.pointerEvents = "none";
+                pwToggleIcon.style.opacity = "0.5";
+            } else {
+                pwToggleIcon.style.pointerEvents = "auto";
+                pwToggleIcon.style.opacity = "1";
+            }
+        }
+        if (passwordInput) {
+            passwordInput.addEventListener('focus', showPwChecklist);
+            passwordInput.addEventListener('input', function () {
+                const val = passwordInput.value;
+                const isLength = val.length >= 8;
+                const isUppercase = /[A-Z]/.test(val);
+                const isSpecial = /[!*$]/.test(val);
+                setChecklist('chk-length', isLength);
+                setChecklist('chk-uppercase', isUppercase);
+                setChecklist('chk-special', isSpecial);
+                if (pwChecklist) pwChecklist.style.display = 'block';
+                updatePwToggleState();
+            });
+            passwordInput.addEventListener('blur', function () {
+                if (passwordInput.value === "" && pwChecklist) {
+                    pwChecklist.style.display = 'none';
+                }
+                updatePwToggleState();
+            });
+            updatePwToggleState();
+        }
+        if (pwToggleIcon) {
+            pwToggleIcon.addEventListener('mousedown', function (e) {
+                if (pwChecklist) pwChecklist.style.display = 'block';
+            });
+        }
+
+        // --- CONFIRM PASSWORD TOGGLE EYE ---
+        const confirmInput = document.getElementById('signupConfirm');
+        const confirmToggleIcon = document.querySelector('img.toggle-pw[onclick*="signupConfirm"]');
+        function updateConfirmToggleState() {
+            if (!confirmToggleIcon) return;
+            if (confirmInput.value.length === 0) {
+                confirmToggleIcon.style.pointerEvents = "none";
+                confirmToggleIcon.style.opacity = "0.5";
+            } else {
+                confirmToggleIcon.style.pointerEvents = "auto";
+                confirmToggleIcon.style.opacity = "1";
+            }
+        }
+        if (confirmInput) {
+            confirmInput.addEventListener('input', updateConfirmToggleState);
+            confirmInput.addEventListener('blur', updateConfirmToggleState);
+            confirmInput.addEventListener('focus', updateConfirmToggleState);
+            updateConfirmToggleState();
+        }
+
+        // Toggle Eye icon chỉ cho click nếu đã nhập (Password hoặc Confirm)
+        function togglePw(id, el) {
+            const input = document.getElementById(id);
+            if (!input || input.value.length === 0) return;
+            if (input.type === "password") {
+                input.type = "text";
+                el.src = "/images/hide.png";
+            } else {
+                input.type = "password";
+                el.src = "/images/show.png";
+            }
+        }
+
+        // Hàm set checklist
+        function setChecklist(id, passed) {
+            const li = document.getElementById(id);
+            if (!li) return;
+            const icon = li.querySelector('.pw-icon');
+            if (passed) {
+                li.classList.add('passed');
+                icon.textContent = '✔';
+            } else {
+                li.classList.remove('passed');
+                icon.textContent = '✖';
+            }
+        }
+
+        // --- VALIDATE CONFIRM PASSWORD ---
+        let confirmError = document.createElement("div");
+        confirmError.style.color = "#db3434";
+        confirmError.style.fontSize = "14px";
+        confirmError.style.marginTop = "4px";
+        confirmError.style.display = "none";
+        if (confirmInput) confirmInput.parentNode.appendChild(confirmError);
+
+        if (confirmInput) {
+            confirmInput.addEventListener('input', function () {
+                if (confirmInput.value === "") {
+                    confirmError.textContent = "Vui lòng nhập lại mật khẩu!";
+                    confirmError.style.display = "block";
+                    return;
+                }
+                if (confirmInput.value !== passwordInput.value) {
+                    confirmError.textContent = "Mật khẩu xác nhận không khớp";
+                    confirmError.style.display = "block";
+                } else {
+                    confirmError.textContent = "";
+                    confirmError.style.display = "none";
+                }
+            });
+            confirmInput.addEventListener('blur', function () {
+                if (confirmInput.value === "") {
+                    confirmError.textContent = "Vui lòng nhập lại mật khẩu!";
+                    confirmError.style.display = "block";
+                }
+            });
+            confirmInput.addEventListener('focus', function () {
+                if (confirmInput.value === "") {
+                    confirmError.textContent = "Vui lòng nhập lại mật khẩu!";
+                    confirmError.style.display = "block";
+                }
+            });
+        }
+
+        // --- VALIDATE LOGIN FORM ---
+        const loginFormElm = document.querySelector('form.login');
+        const loginUsernameInput = loginFormElm.querySelector('input[name="username"]');
+        const loginPwInput = loginFormElm.querySelector('input[name="password"]');
+        let loginUsernameError = document.createElement("div");
+        loginUsernameError.style.color = "#db3434";
+        loginUsernameError.style.fontSize = "14px";
+        loginUsernameError.style.marginTop = "4px";
+        loginUsernameError.style.display = "none";
+        loginUsernameInput.parentNode.appendChild(loginUsernameError);
+
+        let loginPwError = document.createElement("div");
+        loginPwError.style.color = "#db3434";
+        loginPwError.style.fontSize = "14px";
+        loginPwError.style.marginTop = "4px";
+        loginPwError.style.display = "none";
+        loginPwInput.parentNode.appendChild(loginPwError);
+
+        // Icon con mắt
+        let loginPwToggleIcon = loginPwInput.parentNode.querySelector('img.toggle-pw');
+        function updateLoginPwToggleState() {
+            if (!loginPwToggleIcon) return;
+            if (loginPwInput.value.length === 0) {
+                loginPwToggleIcon.style.pointerEvents = "none";
+                loginPwToggleIcon.style.opacity = "0.5";
+            } else {
+                loginPwToggleIcon.style.pointerEvents = "auto";
+                loginPwToggleIcon.style.opacity = "1";
+            }
+        }
+        if (loginPwInput) {
+            loginPwInput.addEventListener('input', updateLoginPwToggleState);
+            loginPwInput.addEventListener('blur', updateLoginPwToggleState);
+            loginPwInput.addEventListener('focus', updateLoginPwToggleState);
+            updateLoginPwToggleState();
+        }
+
+        // Validate username
+        loginUsernameInput.addEventListener('focus', function () {
+            if (loginUsernameInput.value.trim() === "") {
+                loginUsernameError.textContent = "Vui lòng nhập tên đăng nhập!";
+                loginUsernameError.style.display = "block";
+            }
+        });
+        loginUsernameInput.addEventListener('input', function () {
+            if (loginUsernameInput.value.trim() === "") {
+                loginUsernameError.textContent = "Vui lòng nhập tên đăng nhập!";
+                loginUsernameError.style.display = "block";
+            } else {
+                loginUsernameError.textContent = "";
+                loginUsernameError.style.display = "none";
+            }
+        });
+        loginUsernameInput.addEventListener('blur', function () {
+            if (loginUsernameInput.value.trim() === "") {
+                loginUsernameError.textContent = "Vui lòng nhập tên đăng nhập!";
+                loginUsernameError.style.display = "block";
+            } else {
+                loginUsernameError.textContent = "";
+                loginUsernameError.style.display = "none";
+            }
+        });
+
+        // Validate password
+        loginPwInput.addEventListener('focus', function () {
+            if (loginPwInput.value.trim() === "") {
+                loginPwError.textContent = "Vui lòng nhập mật khẩu!";
+                loginPwError.style.display = "block";
+            }
+        });
+        loginPwInput.addEventListener('input', function () {
+            if (loginPwInput.value.trim() === "") {
+                loginPwError.textContent = "Vui lòng nhập mật khẩu!";
+                loginPwError.style.display = "block";
+            } else {
+                loginPwError.textContent = "";
+                loginPwError.style.display = "none";
+            }
+        });
+        loginPwInput.addEventListener('blur', function () {
+            if (loginPwInput.value.trim() === "") {
+                loginPwError.textContent = "Vui lòng nhập mật khẩu!";
+                loginPwError.style.display = "block";
+            } else {
+                loginPwError.textContent = "";
+                loginPwError.style.display = "none";
+            }
+        });
+
+        // Chặn submit nếu có lỗi
+        loginFormElm.addEventListener('submit', function (e) {
+            let valid = true;
+            if (loginUsernameInput.value.trim() === "") {
+                loginUsernameError.textContent = "Vui lòng nhập tên đăng nhập!";
+                loginUsernameError.style.display = "block";
+                valid = false;
+            }
+            if (loginPwInput.value.trim() === "") {
+                loginPwError.textContent = "Vui lòng nhập mật khẩu!";
+                loginPwError.style.display = "block";
+                valid = false;
+            }
+            if (!valid) e.preventDefault();
+        });
+
+
+        // KHÔNG SUBMIT FORM NẾU CÒN LỖI (Signup)
+        signupForm.addEventListener('submit', function (e) {
+            let valid = true;
+            if (!emailValidate()) valid = false;
+            const pwVal = passwordInput.value;
+            const pwOk = pwVal.length >= 8 && /[A-Z]/.test(pwVal) && /[!*$]/.test(pwVal);
+            if (!pwOk) {
+                if (pwChecklist) pwChecklist.style.display = 'block';
+                valid = false;
+            }
+            if (confirmInput.value === "" || confirmInput.value !== passwordInput.value) {
+                confirmError.style.display = "block";
+                valid = false;
+            }
+            if (!valid) e.preventDefault();
+        });
+
+        // Tự động chọn tab đúng theo ViewBag khi load lại (khi có lỗi)
+        window.onload = function () {
+            var activeTab = '@ViewBag.ActiveTab';
+            if (activeTab === "register") {
+                document.getElementById('signup').checked = true;
+                document.querySelector("form.login").style.marginLeft = "-50%";
+                document.querySelector(".title-text .login").style.marginLeft = "-50%";
+            } else {
+                document.getElementById('login').checked = true;
+                document.querySelector("form.login").style.marginLeft = "0%";
+                document.querySelector(".title-text .login").style.marginLeft = "0%";
+            }
+            // Đảm bảo mắt login đúng trạng thái khi load lại
+            updateLoginPwToggleState();
+        }
+
+        // Thêm cho login password có con mắt luôn (nếu muốn)
+        const loginPasswordField = document.querySelector('form.login input[name="password"]');
+        if (loginPasswordField) {
+            loginPasswordField.id = 'loginPassword';
+        }
+    </script>
+
+</body>
+</html>

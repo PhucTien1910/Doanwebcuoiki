@@ -1,0 +1,285 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    var isLogin = Context.Session.GetString("Role") == "Customer";
+    var username = Context.Session.GetString("CustomerName");
+}
+
+    <style>
+        html { scroll-behavior: smooth; }
+        .text-green-custom { color: #6CB33E !important; }
+        .text-green-custom:hover, .text-green-custom:focus { color: #558D31 !important; }
+        .search-bar-custom {
+            background: #f2f8ed; border-radius: 32px; height: 48px; width: 100%;
+            box-shadow: none; transition: box-shadow 0.18s; position: relative;
+        }
+        .search-bar-custom:focus-within { box-shadow: 0 0 0 2px #b6e69a; }
+        .search-input-custom { background: transparent; border: none; outline: none; font-size: 1.13rem; color: #5d6d5a; box-shadow: none; }
+        .search-input-custom::placeholder { color: #8b9a8b; opacity: 1; font-size: 1.13rem; }
+        #searchResultsContainer {
+            position: absolute; left: 0; right: 0; top: 50px; background: #fff;
+            border-radius: 0 0 18px 18px; box-shadow: 0 2px 18px rgba(80,130,80,0.13);
+            border: 1.5px solid #e3f3dc; border-top: none; max-height: 340px; overflow-y: auto;
+            display: none; z-index: 1040;
+        }
+        #searchResultsContainer.show { display: block; }
+        .search-result-item { padding: 12px 18px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f1f7eb; }
+        .search-result-item:last-child { border-bottom: none; }
+        .search-result-item:hover { background: #f4f8f2; }
+        .search-result-img { width: 40px; height: 40px; object-fit: contain; border-radius: 10px; border: 1px solid #eee; }
+        .search-result-name { font-weight: 500; color: #385629; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .search-result-price { color: #db3434; font-weight: 600; white-space: nowrap; }
+        header { position: sticky; top: 0; z-index: 1020; background: #fff; }
+        .main-nav-sticky { position: sticky; top: 66px; z-index: 1019; background: #6CB33E; }
+        section, [id$="Section"] { scroll-margin-top: 110px; }
+        .main-nav-sticky .nav-link {
+            transition: background 0.16s, color 0.16s;
+            border-radius: 8px;
+            color: #fff !important;
+            position: relative;
+        }
+        .main-nav-sticky .nav-link:hover
+        {
+            background: #558D31 !important;
+            color: #fff !important;
+        }
+        /* Dropdown custom */
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 38px;
+            min-width: 180px;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 14px 0 rgba(80,130,80,0.13);
+            z-index: 1100;
+            padding: 8px 0;
+        }
+        .user-dropdown-menu.show {
+            display: block;
+            animation: dropdownFadeIn 0.18s;
+        }
+        @@keyframes dropdownFadeIn {
+            from { opacity: 0; transform: translateY(-10px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .user-dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 20px;
+            color: #385629;
+            font-weight: 500;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: background 0.13s;
+        }
+        .user-dropdown-menu a:hover { background: #f7faf4; color: #6CB33E;}
+        .user-dropdown-menu .dropdown-divider {
+            height: 1px; margin: 6px 0; background: #f1f1f1; border: none;
+        }
+        .user-dropdown-menu .text-danger { color: #db3434 !important; font-weight: bold;}
+        .user-dropdown-menu .text-danger:hover { background: #ffecec; color: #b31919 !important;}
+        /* Ẩn dấu tam giác trên menu */
+        .user-dropdown-menu:before { display: none !important; }
+    </style>
+
+<header class="bg-white shadow-sm" style="position: sticky; top: 0; z-index: 1020;">
+    <div class="container py-2 d-flex justify-content-between align-items-center">
+        <!-- Logo -->
+        <div class="d-flex align-items-center" style="min-width:190px;">
+            <img src="~/images/logo.png" alt="Logo" style="height: 38px; width:auto;" />
+            <span class="ms-2 fs-4 fw-bold text-success">Mô Hình Store</span>
+        </div>
+        <!-- Search -->
+        <div class="mx-4 flex-grow-1" style="position: relative; max-width:700px;">
+            <form class="d-flex">
+                <div class="search-bar-custom flex-grow-1 d-flex align-items-center px-3">
+                    <img src="~/images/icon-10.png" style="height:28px; width:28px;" alt="icon" class="me-2">
+                    <input id="mainSearchInput" type="text" class="search-input-custom flex-grow-1"
+                           placeholder="Nhập sản phẩm cần tìm" autocomplete="off" />
+                    <img src="~/images/icon-search.png" style="height:26px; width:26px;" alt="search" class="ms-2">
+                </div>
+            </form>
+            <div id="searchResultsContainer" class="position-absolute w-100"></div>
+        </div>
+        <!-- User + Cart -->
+        <div class="d-flex align-items-center gap-3">
+            @if (isLogin)
+            {
+                <a href="@Url.Action("Index", "Cart")" class="text-decoration-none" title="Giỏ hàng">
+                    <img src="~/images/shopping-cart.png" style="height:28px;width:28px;vertical-align:middle;" alt="Giỏ hàng" />
+                </a>
+                <div class="user-dropdown d-inline-block position-relative" id="userDropdownWrap">
+                    <a href="javascript:void(0);" id="userDropdownBtn" class="d-inline-block" style="vertical-align:middle;">
+                        <img src="~/images/user.png" style="height:28px;width:28px;" alt="Cá nhân" />
+                    </a>
+                    <div class="user-dropdown-menu" id="userDropdownMenu">
+                        <a href="@Url.Action("Profile", "Account")">
+                            <img src="~/images/user.png" style="height:18px;width:18px;"> Thông tin cá nhân
+                        </a>
+                        <a href="@Url.Action("Orders", "Account")">
+                            <img src="~/images/icon-10.png" style="height:18px;width:18px;"> Đơn hàng đã đặt
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="@Url.Action("Logout", "Account")" class="text-danger">Đăng xuất</a>
+                    </div>
+                </div>
+                <span class="ms-2" style="color:#2e7d32; font-weight:500;">
+                    Xin chào, @username
+                </span>
+            }
+            else
+            {
+                <a href="@Url.Action("Login", "Account")" class="text-decoration-none me-3" style="color: #6CB33E;">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                </a>
+                <a href="@Url.Action("Register", "Account")" class="text-decoration-none" style="color: #6CB33E;">
+                    <i class="fas fa-user-plus"></i> Đăng ký
+                </a>
+            }
+        </div>
+    </div>
+</header>
+
+@if (ViewContext.RouteData.Values["action"]?.ToString() == "Index" &&
+  ViewContext.RouteData.Values["controller"]?.ToString() == "Home")
+{
+    <!-- Menu chính -->
+    <nav class="main-nav-sticky">
+        <div class="container d-flex justify-content-between text-white fw-bold">
+            <a href="#SanPhamMoiSection" class="nav-link text-white py-2">Sản Phẩm Mới</a>
+            <a href="#OnePieceSection" class="nav-link text-white py-2">OnePiece</a>
+            <a href="#NarutoSection" class="nav-link text-white py-2">Naruto</a>
+            <a href="#KimetsuSection" class="nav-link text-white py-2">Kimetsu no Yaiba</a>
+            <a href="#DragonBallSection" class="nav-link text-white py-2">DragonBall</a>
+            <a href="#GundamSection" class="nav-link text-white py-2">Gundam</a>
+        </div>
+    </nav>
+
+    <!-- Menu icon danh mục phụ -->
+    <section class="py-4" style="background-color: #f8fbf5;">
+        <div class="container">
+            <div class="row text-center justify-content-center g-4">
+                <div class="col-6 col-sm-4 col-md-2">
+                    <a href="@Url.Action("AllProducts", "Home")" class="text-decoration-none text-dark">
+                        <img src="~/images/icon-model.png" class="mb-2" style="width: 48px;" />
+                        <p class="fw-bold mb-0">Sản phẩm</p>
+                    </a>
+                </div>
+                <div class="col-6 col-sm-4 col-md-2">
+                    <a href="@Url.Action("News", "Home")" class="text-decoration-none text-dark">
+                        <img src="~/images/icon-news.png" class="mb-2" style="width: 48px;" />
+                        <p class="fw-bold mb-0">Tin tức</p>
+                    </a>
+                </div>
+                <div class="col-6 col-sm-4 col-md-2">
+                    <a href="@Url.Action("About", "Home")" class="text-decoration-none text-dark">
+                        <img src="~/images/icon-best.png" class="mb-2" style="width: 48px;" />
+                        <p class="fw-bold mb-0">Giới thiệu</p>
+                    </a>
+                </div>
+                <div class="col-6 col-sm-4 col-md-2">
+                    <a href="@Url.Action("Contact", "Home")" class="text-decoration-none text-dark">
+                        <img src="~/images/icon-sale.png" class="mb-2" style="width: 48px;" />
+                        <p class="fw-bold mb-0">Liên hệ</p>
+                    </a>
+                </div>
+                <div class="col-6 col-sm-4 col-md-2">
+                    <a href="javascript:void(0);" class="text-decoration-none text-dark" data-bs-toggle="modal" data-bs-target="#comingSoonModal">
+                        <img src="~/images/icon-flash.png" class="mb-2" style="width: 48px;" />
+                        <p class="fw-bold mb-0">Khuyến mãi</p>
+                    </a>
+                </div>
+                <div class="col-6 col-sm-4 col-md-2">
+                    <a href="javascript:void(0);" class="text-decoration-none text-dark" data-bs-toggle="modal" data-bs-target="#comingSoonModal">
+                        <img src="~/images/icon-gift.png" class="mb-2" style="width: 48px;" />
+                        <p class="fw-bold mb-0">Best Seller</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+<script>
+    // SEARCH TỰ ĐỘNG
+    document.addEventListener("DOMContentLoaded", function () {
+        const $input = document.getElementById('mainSearchInput');
+        const $results = document.getElementById('searchResultsContainer');
+        let timer;
+        $input.addEventListener('input', function () {
+            clearTimeout(timer);
+            const val = this.value.trim();
+            if (!val) {
+                $results.innerHTML = '';
+                $results.classList.remove('show');
+                return;
+            }
+            timer = setTimeout(() => {
+                fetch(`/Home/SearchProducts?q=${encodeURIComponent(val)}`)
+                    .then(res => res.json())
+                    .then(list => {
+                        if (!list || !list.length) {
+                            $results.innerHTML = `<div class='p-3 text-muted'>Không tìm thấy sản phẩm</div>`;
+                            $results.classList.add('show');
+                            return;
+                        }
+                        $results.innerHTML = list.map(p =>
+                            `<div class="search-result-item" onclick="window.location='/Home/ProductDetail/${p.product_id}'">
+                                        <img src="/product_images/${p.product_image}" class="search-result-img" alt="">
+                                        <span class="search-result-name">${p.product_name}</span>
+                                        <span class="search-result-price">${(p.product_discount_price || p.product_price).toLocaleString('vi-VN')} ₫</span>
+                                    </div>`
+                        ).join('');
+                        $results.classList.add('show');
+                    });
+            }, 170);
+        });
+        // Ẩn kết quả khi click ngoài
+        document.addEventListener('click', function (e) {
+            if (!$results.contains(e.target) && !$input.contains(e.target)) {
+                $results.classList.remove('show');
+            }
+        });
+        // Hiện lại khi focus vào input nếu có kết quả
+        $input.addEventListener('focus', function () {
+            if ($results.innerHTML.trim()) $results.classList.add('show');
+        });
+
+        // SCROLL MƯỢT ĐẾN DANH MỤC KHI CLICK MENU
+        document.querySelectorAll('.main-nav-sticky .nav-link[href^="#"]').forEach(link => {
+            link.addEventListener('click', function (e) {
+                const id = this.getAttribute('href').replace('#', '');
+                const el = document.getElementById(id);
+                if (el) {
+                    e.preventDefault();
+                    el.scrollIntoView({ behavior: "smooth" });
+                }
+            });
+        });
+    });
+
+    // --- FOCUS: Dropdown user, ĐỂ NGOÀI cùng ---
+    document.addEventListener("DOMContentLoaded", function () {
+        var btn = document.getElementById("userDropdownBtn");
+        var menu = document.getElementById("userDropdownMenu");
+        var wrap = document.getElementById("userDropdownWrap");
+        if (btn && menu) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                menu.classList.toggle("show");
+            });
+            document.addEventListener("mousedown", function (event) {
+                if (!wrap.contains(event.target)) {
+                    menu.classList.remove("show");
+                }
+            });
+        }
+    });
+</script>
+

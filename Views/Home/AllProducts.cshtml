@@ -1,0 +1,537 @@
+﻿@using Doanwebcuoiki.Models
+@model List<Product>
+
+@{
+    Layout = "~/Views/Shared/_ProductLayout.cshtml";
+    var selectedCategories = Context.Request.Query["categories"].ToList();
+    var selectedSort = Context.Request.Query["sort"].ToString();
+    var selectedRatings = Context.Request.Query["ratings"].ToString();
+    var minPrice = Context.Request.Query["minPrice"].ToString();
+    var maxPrice = Context.Request.Query["maxPrice"].ToString();
+    ViewData["Title"] = "Danh sách sản phẩm";
+}
+
+<style>
+    body, html {
+        background: #F5FAF1 !important;
+    }
+
+    main.container, .container {
+        background: transparent !important;
+    }
+    /* Bộ lọc sidebar */
+    .filter-category-box {
+        background: #f8fbf5;
+        border-radius: 16px;
+        padding: 28px 20px 20px 20px;
+        min-width: 230px;
+        max-width: 300px;
+        margin-bottom: 20px;
+    }
+    /* Checkbox */
+    .custom-checkbox {
+        position: relative;
+        cursor: pointer;
+        user-select: none;
+        font-size: 1rem;
+        padding-left: 0;
+        font-weight: 500;
+        color: #253529;
+    }
+    .custom-checkbox input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        left: 0;
+        top: 0;
+        width: 24px;
+        height: 24px;
+        margin: 0;
+        cursor: pointer;
+    }
+    .custom-checkbox .checkmark {
+        width: 24px;
+        height: 24px;
+        border: 2px solid #bfc9b4;
+        border-radius: 7px;
+        background: #fff;
+        display: inline-block;
+        margin-right: 10px;
+        position: relative;
+        transition: border-color .18s, background .18s;
+    }
+    .custom-checkbox input:checked ~ .checkmark {
+        border-color: #6CB33E;
+        background: #6CB33E;
+    }
+    .custom-checkbox .checkmark:after {
+        content: "";
+        display: block;
+        width: 12px;
+        height: 12px;
+        border-radius: 4px;
+        background: #fff;
+        position: absolute;
+        left: 5px;
+        top: 5px;
+        opacity: 0;
+        transition: opacity .15s;
+    }
+    .custom-checkbox input:checked ~ .checkmark:after {
+        opacity: 1;
+        background: #fff;
+    }
+
+    /* Input giá bán, nút lọc */
+    .custom-input {
+        border-radius: 8px !important;
+        background: #fff !important;
+        border: 1.5px solid #e0e7df !important;
+        box-shadow: none !important;
+        padding-left: 12px;
+        font-size: 1rem;
+        height: 38px;
+    }
+    .custom-btn-green {
+        background: #6CB33E !important;
+        color: #fff !important;
+        border-radius: 8px !important;
+        border: none !important;
+        transition: background 0.15s;
+        font-weight: 600;
+        min-width: 44px;
+        min-height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .custom-btn-green:hover, .custom-btn-green:focus {
+        background: #558D31 !important;
+        color: #fff !important;
+    }
+
+    /* Đánh giá radio (bo tròn như mẫu) */
+    .rating-radio {
+        position: relative;
+        cursor: pointer;
+        user-select: none;
+        font-size: 1rem;
+        margin-left: 1px;
+    }
+    .rating-radio input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        left: 0;
+        top: 0;
+        width: 22px;
+        height: 22px;
+        margin: 0;
+    }
+    .rating-radio .radio-mark {
+        display: inline-block;
+        width: 22px;
+        height: 22px;
+        border: 2px solid #bfc9b4;
+        border-radius: 50%;
+        margin-right: 6px;
+        background: #fff;
+        position: relative;
+        vertical-align: middle;
+        transition: border-color .2s;
+    }
+    .rating-radio input:checked ~ .radio-mark {
+        border-color: #6CB33E;
+        background: #6CB33E;
+    }
+    .rating-radio .radio-mark:after {
+        content: "";
+        display: block;
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-radius: 50%;
+        position: absolute;
+        left: 4px;
+        top: 4px;
+        opacity: 0;
+        transition: opacity .18s;
+    }
+    .rating-radio input:checked ~ .radio-mark:after {
+        opacity: 1;
+        background: #fff;
+    }
+    .rating-radio input:checked ~ .radio-mark {
+        box-shadow: 0 0 0 2px #b6e69a;
+    }
+
+    .text-green-custom {
+        color: #6CB33E !important;
+    }
+    /* Dropdown sort */
+    .custom-select-sort {
+        min-width: 180px;
+        border-radius: 30px;
+        border: 2px solid #6CB33E;
+        padding: 8px 20px 8px 16px;
+        background: #fff url('data:image/svg+xml;utf8,<svg fill="green" height="20" width="20" viewBox="0 0 20 20"><polygon points="0,0 20,0 10,10"/></svg>') no-repeat right 16px center/18px;
+        font-weight: 600;
+        color: #253529;
+        cursor: pointer;
+        appearance: none;
+    }
+    .custom-select-sort:focus {
+        border-color: #558D31;
+        outline: none;
+    }
+    .sort-label {
+        font-weight: 500;
+        margin-right: 10px;
+        font-size: 1.1rem;
+        color: #283d1a;
+    }
+    /* Hover Thêm vào giỏ */
+    .btn-add-cart {
+        border: 2px solid #6CB33E;
+        color: #6CB33E;
+        background: #fff;
+        font-weight: 600;
+        border-radius: 9px;
+        transition: background .14s, color .14s;
+    }
+    .btn-add-cart:hover, .btn-add-cart:focus {
+        background: #6CB33E;
+        color: #fff;
+    }
+    /* Card */
+    .product-card {
+        transition: box-shadow .16s;
+        border-radius: 15px !important;
+    }
+    .product-card:hover {
+        box-shadow: 0 2px 16px 0 rgba(64,180,60,.09), 0 0 0 1.5px #a4e8ad;
+    }
+
+    .breadcrumb-product {
+        font-size: 15px;
+        color: #98b897;
+        margin-bottom: 20px;
+    }
+
+    .breadcrumb-product a {
+        color: #6CB33E;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .breadcrumb-product a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-product .fw-semibold {
+        color: #6CB33E !important;
+        font-weight: 600 !important;
+    }
+</style>
+
+<div class="container mt-4" style="margin-bottom: 40px;">
+    <nav class="breadcrumb-product mb-3" aria-label="breadcrumb">
+        <a href="/">Trang chủ</a>
+        <span> / </span>
+        <span class="fw-semibold" style="color:#6CB33E">Danh mục sản phẩm</span>
+    </nav>
+    <div class="row">
+        <!-- Sidebar filter -->
+        <div class="col-md-3">
+            <div class="filter-category-box">
+                <form method="get" id="filterForm" asp-action="AllProducts" asp-controller="Home">
+                    <h6 class="fw-bold mb-3">Danh mục</h6>
+                    <div class="d-flex flex-column gap-2">
+                        @{
+                            var categories = new[] {
+                                new { Text = "Sản phẩm mới", Value = "sanphammoi" },
+                                new { Text = "OnePiece", Value = "onepiece" },
+                                new { Text = "Naruto", Value = "naruto" },
+                                new { Text = "DragonBall", Value = "dragonball" },
+                                new { Text = "Kimetsu no Yaiba", Value = "kimetsunoyaiba" },
+                                new { Text = "Gundam", Value = "gundam" }
+                            };
+                        }
+                        @foreach (var c in categories)
+                        {
+                            <label class="custom-checkbox d-flex align-items-center mb-1">
+                                <input type="checkbox" name="categories" value="@c.Value"
+                                    @(selectedCategories.Contains(c.Value) ? "checked" : "")
+                                    onchange="document.getElementById('filterForm').submit();" />
+                                <span class="checkmark"></span>
+                                <span class="ms-2">@c.Text</span>
+                            </label>
+                        }
+                    </div>
+                    <a href="#" class="d-block mt-2 fw-bold text-green-custom" style="color:#6CB33E;">Xem thêm</a>
+
+                    <!-- Giá bán -->
+                    <div class="mb-4 mt-4">
+                        <h6 class="fw-bold mb-2">Giá bán</h6>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="number" class="form-control custom-input" name="minPrice" placeholder="Tối thiểu" value="@minPrice" style="max-width:105px;" />
+                            <span class="fw-bold">-</span>
+                            <input type="number" class="form-control custom-input" name="maxPrice" placeholder="Tối đa" value="@maxPrice" style="max-width:105px;" />
+                            <button type="submit" class="btn custom-btn-green ms-1" title="Lọc"><i class="fas fa-play"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Đánh giá -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2">Đánh giá</h6>
+                        @for (int i = 5; i >= 1; i--)
+                        {
+                            <label class="rating-radio d-flex align-items-center mb-1">
+                                <input type="radio" name="ratings" value="@i" @(selectedRatings == i.ToString() ? "checked" : "") onchange="document.getElementById('filterForm').submit();" />
+                                <span class="radio-mark me-2"></span>
+                                <span class="me-1 fw-bold">@i</span>
+                                <span class="text-warning fs-5" style="margin-top:-1px"><i class="fas fa-star"></i></span>
+                                <span class="text-muted ms-1" style="font-size:.95em;">+</span>
+                            </label>
+                        }
+                    </div>
+
+                    <!-- Xóa bộ lọc -->
+                    <button type="button" class="btn custom-btn-green w-100 fw-bold" onclick="window.location.href='@Url.Action("AllProducts", "Home")'">Xóa bộ lọc</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Product List and Sort -->
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+                <div class="d-flex align-items-center flex-wrap gap-3">
+                    <span class="sort-label"><i class="fas fa-sort"></i> Sắp xếp theo</span>
+                    <form method="get" id="sortForm" class="d-inline">
+                        @foreach (var c in selectedCategories)
+                        {
+                            <input type="hidden" name="categories" value="@c" />
+                        }
+                        <input type="hidden" name="minPrice" value="@minPrice" />
+                        <input type="hidden" name="maxPrice" value="@maxPrice" />
+                        <input type="hidden" name="ratings" value="@selectedRatings" />
+                        <select name="sort" class="custom-select-sort" onchange="document.getElementById('sortForm').submit();">
+                            @Html.Raw($"<option value=\"\" {(string.IsNullOrEmpty(selectedSort) ? "selected" : "")}>Phổ biến</option>")
+                            @Html.Raw($"<option value=\"sold\" {(selectedSort == "sold" ? "selected" : "")}>Mua nhiều</option>")
+                            @Html.Raw($"<option value=\"priceAsc\" {(selectedSort == "priceAsc" ? "selected" : "")}>Giá thấp đến cao</option>")
+                            @Html.Raw($"<option value=\"priceDesc\" {(selectedSort == "priceDesc" ? "selected" : "")}>Giá cao đến thấp</option>")
+                        </select>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4" id="productList">
+                @if (Model != null && Model.Count > 0)
+                {
+                    foreach (var item in Model)
+                    {
+                        <div class="col">
+                            <div class="card h-100 shadow-sm product-card">
+                                <a href="@Url.Action("ProductDetail", "Home", new { id = item.product_id })">
+                                    <img src="~/product_images/@item.product_image" class="card-img-top" alt="@item.product_name" style="height: 220px; object-fit: contain; cursor:pointer;" />
+                                </a>
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex justify-content-between small text-muted mb-1">
+                                        <span>
+                                            <i class="fas fa-star text-warning"></i> @item.product_rating.ToString("0.0") (@item.product_review_count)
+                                        </span>
+                                        <span>Đã bán: @item.product_sold</span>
+                                    </div>
+                                    <h6 class="card-title fw-bold text-truncate" title="@item.product_name">@item.product_name</h6>
+                                    @if (item.product_discount_price.HasValue)
+                                    {
+                                        var discountPercent = (int)Math.Round(100.0 * (item.product_price - item.product_discount_price.Value) / item.product_price);
+                                        <div class="mb-2">
+                                            <span class="text-danger fw-bold">@String.Format("{0:N0}", item.product_discount_price) ₫</span>
+                                            <span class="text-muted text-decoration-line-through ms-2">@String.Format("{0:N0}", item.product_price) ₫</span>
+                                            <span class="badge bg-danger ms-2">-@discountPercent%</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-danger fw-bold mb-2">@String.Format("{0:N0}", item.product_price) ₫</p>
+                                    }
+                                    <button class="btn btn-add-cart mt-auto w-100">
+                                        <i class="fas fa-cart-plus me-1"></i> Thêm vào giỏ
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="d-flex justify-content-center align-items-center" style="min-height: 60vh; width: 100%;">
+                        <div class="no-result-warning text-center w-100">
+                            <i class="fas fa-exclamation-triangle" style="font-size:72px; color:#e1636d; margin-bottom:20px;"></i>
+                            <div class="fw-bold fs-4 mt-2">Không có sản phẩm nào phù hợp với bộ lọc!</div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- ===== FOOTER ===== -->
+<style>
+    .footer-bg {
+        background: url('/images/anh-songoku.jpg') no-repeat center center/cover;
+        position: relative;
+        z-index: 1;
+        width: 100vw;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        min-height: 440px; /* Đổi số px cho cao lên */
+    }
+
+    .footer-overlay {
+        background: rgba(20, 20, 20, 0.77);
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+    }
+
+    .footer-content {
+        position: relative;
+        z-index: 3;
+        color: #fff;
+        padding: 90px 0 50px 0; /* Tăng trên/dưới cho rộng */
+    }
+
+    .footer-title {
+        font-weight: 700;
+        font-size: 1.15rem;
+        margin-bottom: 1.1rem;
+        letter-spacing: 0.03em;
+    }
+
+    .footer-list, .footer-contact {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .footer-list li, .footer-contact li {
+            margin-bottom: 9px;
+        }
+
+            .footer-list li a {
+                color: #f3f3f3;
+                text-decoration: none;
+                transition: color 0.18s;
+                font-size: 1rem;
+            }
+
+                .footer-list li a:hover {
+                    color: #ffd700;
+                }
+
+        .footer-contact li {
+            font-size: 1rem;
+            color: #f3f3f3;
+        }
+
+    .footer-logo {
+        max-width: 120px;
+        margin-bottom: 14px;
+    }
+
+    .footer-social a {
+        color: #fff;
+        margin-right: 10px;
+        font-size: 1.36rem;
+        transition: color 0.19s;
+        display: inline-block;
+    }
+
+        .footer-social a:hover {
+            color: #ffd700;
+        }
+
+    @@media (max-width: 900px) {
+        .footer-content
+
+    {
+        padding: 32px 0 20px 0;
+    }
+
+    }
+</style>
+<div class="footer-bg" style="min-height: 340px; position: relative;">
+    <div class="footer-overlay"></div>
+    <div class="footer-content container-fluid px-0">
+        <div class="footer-inner container">
+            <div class="row">
+                <!-- Thông tin website -->
+                <div class="col-12 col-md-4 mb-4 mb-md-0">
+                    <img src="/images/logo-footer.png" alt="Logo" class="footer-logo" />
+                    <div class="fw-bold mb-2" style="font-size: 1.04rem;">
+                        WEBSITE THUỘC QUYỀN SỞ HỮU:
+                    </div>
+                    <ul class="footer-contact">
+                        <li>Shop Mô Hình - Shop mô hình anime giá rẻ</li>
+                        <li>Địa Chỉ: 847 Sư Vạn Hạnh, Phường Hòa Hưng, TP.HCM</li>
+                        <li>Hotline: 0353743769</li>
+                        <li>Email: shopmohinh@gmail.com</li>
+                    </ul>
+                </div>
+                <!-- Danh mục sản phẩm -->
+                <div class="col-6 col-md-2 mb-4 mb-md-0">
+                    <div class="footer-title">DANH MỤC SẢN PHẨM</div>
+                    <ul class="footer-list">
+                        <li><a href="#">OnePiece</a></li>
+                        <li><a href="#">Naruto</a></li>
+                        <li><a href="#">Songoku</a></li>
+                        <li><a href="#">Kimetsu no Yaiba</a></li>
+                        <li><a href="#">Gundam</a></li>
+                    </ul>
+                </div>
+                <!-- Chính sách -->
+                <div class="col-6 col-md-3 mb-4 mb-md-0">
+                    <div class="footer-title">LIÊN HỆ</div>
+                    <ul class="footer-list">
+                        <li><a href="#">Chính sách bảo hành</a></li>
+                        <li><a href="#">Chính sách đổi trả</a></li>
+                        <li><a href="#">Chính sách vận chuyển</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+                <!-- Kết nối -->
+                <div class="col-12 col-md-3">
+                    <div class="footer-title">KẾT NỐI VỚI SHOP MÔ HÌNH</div>
+                    <div class="footer-social mb-2">
+                        <a href="https://facebook.com/Nguyen.Phuc.Tien.BeDe" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/np.tien19._.04/" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                    <div class="mb-1">
+                        <!-- Facebook Page Plugin (nếu muốn hiện fanpage, thay link vào data-href) -->
+                        <div class="fb-page"
+                             data-href="https://www.facebook.com/Nguyen.Phuc.Tien.BeDe"
+                             data-tabs=""
+                             data-width="220"
+                             data-height="90"
+                             data-small-header="true"
+                             data-adapt-container-width="true"
+                             data-hide-cover="false"
+                             data-show-facepile="true"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Nhúng SDK Facebook cuối trang (chỉ cần 1 lần trên toàn site) -->
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous"
+        src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v19.0">
+</script>
+
+
